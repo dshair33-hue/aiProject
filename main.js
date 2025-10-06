@@ -174,7 +174,9 @@
       const def = unitDefs[id];
       const opt = document.createElement('option');
       opt.value = String(def.index);
-      opt.textContent = `#${def.index} ${def.name} (ATK ${def.attack}, HP ${def.hp})`;
+      // Display simplified label (e.g., 일반유닛, 중급유닛, 상급유닛)
+      const baseLabel = (def.name || '').replace(/\d+$/, '');
+      opt.textContent = baseLabel || def.name || `유닛 ${def.index}`;
       unitSelectorEl.appendChild(opt);
     }
   }
