@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>전투 단계 데모</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="top-bar">
+        <div class="stage-indicator">
+          <span>Stage</span>
+          <strong id="stageLabel">1</strong>
+        </div>
+      </header>
+
+      <main class="battle-area">
+        <section class="board board-enemy">
+          <div class="board-title">적 배치 공간</div>
+          <div id="enemyGrid" class="grid"></div>
+        </section>
+
+        <section class="controls">
+          <button id="startButton" class="btn btn-primary">전투 시작</button>
+
+          <div class="unit-loadout">
+            <label for="unitSelector">유닛 선택</label>
+            <select id="unitSelector">
+              <option value="" selected>선택...</option>
+            </select>
+            <div class="hint">전투 시작 전, 하단 격자를 클릭해 유닛을 배치하세요.</div>
+          </div>
+        </section>
+
+        <section class="board board-player">
+          <div class="board-title">플레이어 유닛 배치 공간</div>
+          <div id="playerGrid" class="grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="resultOverlay" class="overlay hidden">
+      <div class="dialog">
+        <div id="resultMessage" class="dialog-title"></div>
+        <div id="resultDetails" class="dialog-body"></div>
+        <div class="dialog-actions">
+          <button id="restartButton" class="btn btn-secondary">다시 시작</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
