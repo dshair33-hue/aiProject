@@ -1,0 +1,5 @@
+index,name,attack,attacktime,hp,armor,useItem,useItemNum,useGold,unitMax
+int,string,int,int,int,int,string,int,int,int
+1,¿œπ›¿Ø¥÷1,5,500,20,0,normal1,1,10,3
+2,¡ﬂ±ﬁ¿Ø¥÷1,6,250,40,2,midBoss1,1,20,2
+3,ªÛ±ﬁ¿Ø¥÷1,10,250,100,5,boss1,2,50,1
