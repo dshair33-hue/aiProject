@@ -7,9 +7,9 @@
   const INITIAL_STAGE = 1; // Only combat phase implemented; keep stage fixed for now
 
   // Assumptions due to unspecified details:
-  // - Stage.csv positions are 1-based; convert to 0-based for UI grid
-  // - Targeting is column-aligned: units attack the nearest enemy in the same column only
-  // - Minimum damage is at least 1 to avoid stalemates (attack - armor, clamped to >= 1)
+  // - Stage.csv positions are 0-based (x:0..4, y:0..1)
+  // - Targeting includes vertical OR horizontal alignment (same column OR same row)
+  // - Minimum damage is at least 1 (attack - armor, clamped to >= 1)
 
   // ----- DOM -----
   const enemyGridEl = document.getElementById('enemyGrid');
@@ -94,9 +94,9 @@
       if(row.length < 4) continue;
       const stage = parseIntSafe(row[0]);
       const monsterId = parseIntSafe(row[1]);
-      // Convert to 0-based coordinates
-      const x = clamp(parseIntSafe(row[2]) - 1, 0, NUM_COLS - 1);
-      const y = clamp(parseIntSafe(row[3]) - 1, 0, NUM_ROWS - 1);
+      // Coordinates are already 0-based in Stage.csv
+      const x = clamp(parseIntSafe(row[2]), 0, NUM_COLS - 1);
+      const y = clamp(parseIntSafe(row[3]), 0, NUM_ROWS - 1);
       if(!stageMap[stage]) stageMap[stage] = [];
       stageMap[stage].push({ monsterId, x, y });
     }
@@ -408,18 +408,30 @@
   }
 
   function acquireTarget(attacker, defenders, attackerIsEnemy){
-    // Column-aligned targeting only
-    const sameCol = defenders.filter(d=>d.alive && d.x === attacker.x);
-    if(sameCol.length === 0) return null;
-    // Nearest by row toward the middle gap
-    if(attackerIsEnemy){
-      // Enemy is above; nearest player row is y=0 (top row)
-      sameCol.sort((a,b)=> a.y - b.y); // ascending: 0,1...
-    }else{
-      // Player is below; nearest enemy row is y=1 (bottom row)
-      sameCol.sort((a,b)=> b.y - a.y); // descending: 1,0...
-    }
-    return sameCol[0] || null;
+    // Include targets aligned either vertically (same column) or horizontally (same row)
+    const candidates = defenders.filter(d => d.alive && (d.x === attacker.x || d.y === attacker.y));
+    if(candidates.length === 0) return null;
+
+    const withDist = candidates.map(d => {
+      const sameColumn = d.x === attacker.x;
+      const sameRow = d.y === attacker.y;
+      const dist = sameColumn ? Math.abs(attacker.y - d.y) : Math.abs(attacker.x - d.x);
+      return { d, dist, sameColumn, sameRow };
+    });
+
+    withDist.sort((a,b) => {
+      if(a.dist !== b.dist) return a.dist - b.dist;
+      // Prefer vertical (column) over horizontal for tie-breaker
+      if(a.sameColumn !== b.sameColumn) return a.sameColumn ? -1 : 1;
+      // Then prefer smaller horizontal distance
+      const ax = Math.abs(attacker.x - a.d.x), bx = Math.abs(attacker.x - b.d.x);
+      if(ax !== bx) return ax - bx;
+      // Stable deterministic fallback
+      if(a.d.x !== b.d.x) return a.d.x - b.d.x;
+      return a.d.y - b.d.y;
+    });
+
+    return withDist[0].d;
   }
 
   function checkVictory(){
