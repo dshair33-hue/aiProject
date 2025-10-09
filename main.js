@@ -142,8 +142,7 @@ diff --git a/main.js b/main.js
 +    // Populate unit selector
 +    populateUnitSelector();
 +
-+    // Compose enemies for the current stage
-+    resetEnemiesToStage(currentStage);
++    // Defer enemy deployment until combat starts
 +
 +    // Hook events
 +    startButtonEl.addEventListener('click', onStartCombat);
@@ -334,6 +333,8 @@ diff --git a/main.js b/main.js
 +      alert('유닛을 배치하세요.');
 +      return;
 +    }
++    // Auto-deploy enemies for this stage at combat start
++    resetEnemiesToStage(currentStage);
 +    isCombatActive = true;
 +    startButtonEl.disabled = true;
 +    startButtonEl.style.display = 'none';
@@ -347,11 +348,9 @@ diff --git a/main.js b/main.js
 +    // Hide overlay
 +    resultOverlayEl.classList.add('hidden');
 +
-+    // Reset entities
-+    for(const e of enemies){
-+      e.hp = e.maxHp; e.alive = true; e.timeSinceAttack = 0;
-+      mountEntityEl(e);
-+    }
++    // Clear enemy grid/state; enemies re-deploy on next start
++    for(const cell of enemyGridEl.querySelectorAll('.cell')){ cell.innerHTML = ''; }
++    enemies = [];
 +    for(const p of players){
 +      p.hp = p.maxHp; p.alive = true; p.timeSinceAttack = 0;
 +      mountEntityEl(p);
